@@ -3,7 +3,7 @@ from telebot import types
 from datetime import datetime
 
 bot = telebot.TeleBot('5338205847:AAFYNddrGLJ6cM1Q41NDdODumNO_zsmKNr0')  # token
-
+TO_CHAT_ID = 753246752
 def mainmenu():
     keyboard = types.InlineKeyboardMarkup()
     keyboard = types.InlineKeyboardMarkup(row_width=2)  # выбираем тип клавиатуры
@@ -16,12 +16,19 @@ def mainmenu():
     weather = types.InlineKeyboardButton(text='Погода\U0001F31E', callback_data='btn2')
     time = types.InlineKeyboardButton(text='Местное время\U0001F552', callback_data='btn5')
     keyboard.add(time, weather)
+    call = types.InlineKeyboardButton(text='Задать вопрос администратору \U0001F552', callback_data='btn7')
+    keyboard.add(call)
     return keyboard
+
 
 @bot.message_handler(commands=['start'])
 def start(message):
     keyboard_1 = mainmenu()
     bot.send_message(message.chat.id, 'Отель <b>"Gratia"</b>', reply_markup=keyboard_1, parse_mode='HTML')
+
+@bot.message_handler(content_types=['text'])
+def all_messages(message):
+    bot.forward_message(TO_CHAT_ID, message.chat.id, message.message_id)
 
 @bot.callback_query_handler(func=lambda callback: callback.data)
 def answer_callback(callback):
@@ -41,6 +48,9 @@ def answer_callback(callback):
 Отдел бронирования: +79878878756
 email: fedorov_ns@mail.ru
 """, reply_markup=kb, parse_mode='HTML')
+
+    elif callback.data == 'btn7':
+        bot.send_message(callback.message.chat.id, 'Задайте свой вопрос')
 
     elif callback.data == 'btn5':  # возвращает сообщение с датой и временем в режиже реального времени
         bot.send_message(callback.message.chat.id,
@@ -80,6 +90,7 @@ email: fedorov_ns@mail.ru
 
 Это любимая часть города Гротеска среди наших гостей согласно независимым отзывам.
 """, parse_mode='HTML')
+
 
     elif callback.data == 'btn6':
         uslugimenu = types.InlineKeyboardMarkup(row_width=2)
